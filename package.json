@@ -1,0 +1,15 @@
+{
+  "name": "bilibili-sponsorblock-ai-userscript",
+  "version": "0.1.0",
+  "private": true,
+  "license": "GPL-3.0-only",
+  "scripts": {
+    "build": "tsc --noEmit && webpack --config webpack.config.js"
+  },
+  "devDependencies": {
+    "ts-loader": "^9.5.2",
+    "typescript": "5.9.2",
+    "webpack": "^5.105.4",
+    "webpack-cli": "^5.1.4"
+  }
+}
