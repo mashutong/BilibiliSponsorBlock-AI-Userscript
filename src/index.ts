@@ -1,7 +1,8 @@
-import { analyseSubtitles, clearAnalysisCache } from "./analysis";
-import { addMenu, deleteSetting, getSetting, request, setSetting } from "./bridge";
+import { analyseSubtitles } from "./analysis";
+import { getSetting, request } from "./bridge";
 import { mergeRanges, minimumAiVideoDuration, parseVideoAddress, skipTargetAt, SponsorRange } from "./core";
 import { lookupSegments, submitSegments } from "./server";
+import { registerSettingsMenu } from "./settings";
 import { getSubtitleCues } from "./subtitles";
 
 interface VideoIdentity {
@@ -157,20 +158,6 @@ function refreshPlayer(): void {
     if (!video.paused && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) onPlaying();
 }
 
-addMenu("设置 DeepSeek API Key", () => {
-    const key = window.prompt("请输入 DeepSeek API Key（只保存在此设备的 Tampermonkey 中）", "");
-    if (key?.trim()) {
-        setSetting("aiApiKey", key.trim());
-        clearAnalysisCache();
-        window.alert("已保存。下一个视频开始播放时生效。");
-    }
-});
-addMenu("清除 DeepSeek API Key", () => {
-    if (!window.confirm("清除此设备保存的 DeepSeek API Key？")) return;
-    deleteSetting("aiApiKey");
-    clearAnalysisCache();
-    window.alert("已清除。");
-});
-
+registerSettingsMenu();
 refreshPlayer();
 setInterval(refreshPlayer, 750);

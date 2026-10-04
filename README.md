@@ -7,7 +7,7 @@
 1. 在 Chrome 安装原版小电视空降助手和 [Tampermonkey](https://www.tampermonkey.net/)。如果浏览器里还启用了带 AI 功能的修改版，请先停用修改版，避免两套跳转逻辑同时运行。
 2. 在 `chrome://extensions` 的 Tampermonkey 详情页打开“允许用户脚本”（Chrome 138 及以上）。
 3. 在 Tampermonkey 控制面板中从 URL 安装 [`bsb-ai.user.js`](https://raw.githubusercontent.com/mashutong/BilibiliSponsorBlock-AI-Userscript/main/bsb-ai.user.js)。
-4. 打开 B 站视频页，在 Tampermonkey 的本脚本菜单中选择“设置 DeepSeek API Key”。每台设备各设置一次；脚本源码和 GitHub 仓库不包含 Key。
+4. 打开 B 站视频页，点 Tampermonkey 图标，在本脚本菜单中选择“设置 DeepSeek API Key”。设置面板可直接保存、修改或清除 Key；每台设备各设置一次。脚本源码和 GitHub 仓库不包含 Key。
 
 安装后，Tampermonkey 会根据脚本头部的 `@version`、`@updateURL`、`@downloadURL` 检查更新。若还希望新设备自动获得已安装的脚本，可在 Tampermonkey 的 **Script Sync** 中使用浏览器同步、Dropbox 或 WebDAV；脚本更新本身不要求开启 Script Sync。参考 [Tampermonkey 官方同步说明](https://www.tampermonkey.net/faq.php?q=Q105)。
 

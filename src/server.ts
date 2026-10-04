@@ -71,7 +71,7 @@ export async function submitSegments(
             userID: getUserId(),
             segments,
             videoDuration: duration,
-            userAgent: "Tampermonkey-BSB-AI/0.1.0",
+            userAgent: "Tampermonkey-BSB-AI/0.1.1",
         }),
     });
     if (response.status !== 200) return false;

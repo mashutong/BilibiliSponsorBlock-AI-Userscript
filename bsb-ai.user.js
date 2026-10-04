@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         小电视空降助手 AI 字幕补充
 // @namespace    https://github.com/mashutong/BilibiliSponsorBlock-AI-Userscript
-// @version      0.1.0
+// @version      0.1.1
 // @description 仅在原版服务端无片段时，分析五分钟以上的 B 站视频字幕并跳过广告
 // @match        https://www.bilibili.com/video/*
 // @match        https://www.bilibili.com/list/*
@@ -337,7 +337,7 @@ async function submitSegments(server, bvid, cid, duration, ranges) {
             userID: getUserId(),
             segments,
             videoDuration: duration,
-            userAgent: "Tampermonkey-BSB-AI/0.1.0",
+            userAgent: "Tampermonkey-BSB-AI/0.1.1",
         }),
     });
     if (response.status !== 200)
@@ -350,6 +350,109 @@ async function submitSegments(server, bvid, cid, duration, ranges) {
     catch (_) {
         return false;
     }
+}
+
+
+/***/ },
+
+/***/ 303
+(__unused_webpack_module, exports, __webpack_require__) {
+
+var __webpack_unused_export__;
+
+__webpack_unused_export__ = ({ value: true });
+exports.registerSettingsMenu = registerSettingsMenu;
+const analysis_1 = __webpack_require__(564);
+const bridge_1 = __webpack_require__(163);
+const hostId = "bsb-ai-settings";
+function openSettings() {
+    var _a;
+    (_a = document.getElementById(hostId)) === null || _a === void 0 ? void 0 : _a.remove();
+    const previousFocus = document.activeElement;
+    const host = document.createElement("div");
+    host.id = hostId;
+    host.style.cssText = "position:fixed;inset:0;z-index:2147483647";
+    const shadow = host.attachShadow({ mode: "open" });
+    shadow.innerHTML = `
+        <style>
+            * { box-sizing: border-box; }
+            .backdrop { position: absolute; inset: 0; display: grid; place-items: center;
+                background: rgba(0, 0, 0, .55); font: 14px/1.5 system-ui, sans-serif; color: #222; }
+            .panel { width: min(420px, calc(100vw - 32px)); padding: 22px; border-radius: 12px;
+                background: #fff; box-shadow: 0 12px 40px rgba(0, 0, 0, .3); }
+            h2 { margin: 0 0 12px; font-size: 18px; }
+            p { margin: 8px 0; }
+            label { display: block; margin: 16px 0 6px; font-weight: 600; }
+            input { width: 100%; padding: 9px 10px; border: 1px solid #999; border-radius: 6px;
+                font: inherit; color: #222; background: #fff; }
+            .hint { color: #666; font-size: 12px; }
+            .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+            button { padding: 8px 14px; border: 1px solid #aaa; border-radius: 6px; background: #fff;
+                color: #222; font: inherit; cursor: pointer; }
+            button.primary { border-color: #00a1d6; background: #00a1d6; color: #fff; }
+            button:focus-visible, input:focus-visible { outline: 2px solid #00a1d6; outline-offset: 2px; }
+            [hidden] { display: none !important; }
+        </style>
+        <div class="backdrop">
+            <section class="panel" role="dialog" aria-modal="true" aria-labelledby="title">
+                <h2 id="title">AI 字幕跳广告设置</h2>
+                <p id="status"></p>
+                <label for="api-key">DeepSeek API Key</label>
+                <input id="api-key" type="password" autocomplete="off" spellcheck="false"
+                    placeholder="粘贴新的 API Key" aria-describedby="hint">
+                <p id="hint" class="hint">Key 保存在此设备的 Tampermonkey 中；保存后，下一个视频开始播放时生效。</p>
+                <div class="actions">
+                    <button id="clear" type="button">清除 Key</button>
+                    <button id="cancel" type="button">取消</button>
+                    <button id="save" class="primary" type="button">保存</button>
+                </div>
+            </section>
+        </div>`;
+    document.body.append(host);
+    const input = shadow.querySelector("#api-key");
+    const status = shadow.querySelector("#status");
+    const clear = shadow.querySelector("#clear");
+    const close = () => {
+        host.remove();
+        previousFocus === null || previousFocus === void 0 ? void 0 : previousFocus.focus();
+    };
+    const updateStatus = () => {
+        const saved = Boolean((0, bridge_1.getSetting)("aiApiKey"));
+        status.textContent = saved ? "状态：已设置 Key（不会显示原值）" : "状态：未设置 Key";
+        clear.hidden = !saved;
+    };
+    updateStatus();
+    shadow.querySelector("#save").addEventListener("click", () => {
+        const key = input.value.trim();
+        if (!key) {
+            status.textContent = "请输入新的 DeepSeek API Key。";
+            input.focus();
+            return;
+        }
+        (0, bridge_1.setSetting)("aiApiKey", key);
+        (0, analysis_1.clearAnalysisCache)();
+        close();
+    });
+    clear.addEventListener("click", () => {
+        if (!window.confirm("清除此设备保存的 DeepSeek API Key？"))
+            return;
+        (0, bridge_1.deleteSetting)("aiApiKey");
+        (0, analysis_1.clearAnalysisCache)();
+        close();
+    });
+    shadow.querySelector("#cancel").addEventListener("click", close);
+    shadow.querySelector(".backdrop").addEventListener("click", (event) => {
+        if (event.target === event.currentTarget)
+            close();
+    });
+    shadow.addEventListener("keydown", (event) => {
+        if (event.key === "Escape")
+            close();
+    });
+    input.focus();
+}
+function registerSettingsMenu() {
+    (0, bridge_1.addMenu)("设置 DeepSeek API Key", openSettings);
 }
 
 
@@ -578,6 +681,7 @@ const analysis_1 = __webpack_require__(564);
 const bridge_1 = __webpack_require__(163);
 const core_1 = __webpack_require__(721);
 const server_1 = __webpack_require__(209);
+const settings_1 = __webpack_require__(303);
 const subtitles_1 = __webpack_require__(269);
 const logPrefix = "[BSB AI userscript]";
 let currentVideo = null;
@@ -738,21 +842,7 @@ function refreshPlayer() {
     if (!video.paused && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA)
         onPlaying();
 }
-(0, bridge_1.addMenu)("设置 DeepSeek API Key", () => {
-    const key = window.prompt("请输入 DeepSeek API Key（只保存在此设备的 Tampermonkey 中）", "");
-    if (key === null || key === void 0 ? void 0 : key.trim()) {
-        (0, bridge_1.setSetting)("aiApiKey", key.trim());
-        (0, analysis_1.clearAnalysisCache)();
-        window.alert("已保存。下一个视频开始播放时生效。");
-    }
-});
-(0, bridge_1.addMenu)("清除 DeepSeek API Key", () => {
-    if (!window.confirm("清除此设备保存的 DeepSeek API Key？"))
-        return;
-    (0, bridge_1.deleteSetting)("aiApiKey");
-    (0, analysis_1.clearAnalysisCache)();
-    window.alert("已清除。");
-});
+(0, settings_1.registerSettingsMenu)();
 refreshPlayer();
 setInterval(refreshPlayer, 750);
 
